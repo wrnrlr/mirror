@@ -1,0 +1,16 @@
+[package]
+name = "mirror"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+glam = "0.20.0"
+hecs = "0.7.3"
+env_logger = { version = "0.9", default-features = false, features = ["termcolor", "atty"] }
+g3 = { git = "https://github.com/wrnrlr/g3", rev = "c451cda" }
+rend3 = { path = "../rend3/rend3" }
+rend3-routine = { path = "../rend3/rend3-routine" }
+rend3-framework = { path = "../rend3/rend3-framework" }
+winit = { version = "0.26" }
+core_simd = { git = "https://github.com/rust-lang/stdsimd" }
+fxhash = "0.2.1"

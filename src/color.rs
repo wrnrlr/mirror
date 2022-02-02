@@ -4,6 +4,7 @@ pub struct Color(pub u32);
 impl Color {
   pub const BLACK: Self = Self(0x000000FF);
   pub const WHITE: Self = Self(0xFFFFFFFF);
+  pub const GREY: Self = Color(0xFF888888);
   pub const RED: Self = Self(0xFF0000FF);
   pub const GREEN: Self = Self(0x00FF00FF);
   pub const BLUE: Self = Self(0x0000FFFF);

@@ -7,10 +7,16 @@ edition = "2021"
 glam = "0.20.0"
 hecs = "0.7.3"
 env_logger = { version = "0.9", default-features = false, features = ["termcolor", "atty"] }
-g3 = { git = "https://github.com/wrnrlr/g3", rev = "c451cda" }
-rend3 = { path = "../rend3/rend3" }
-rend3-routine = { path = "../rend3/rend3-routine" }
-rend3-framework = { path = "../rend3/rend3-framework" }
 winit = { version = "0.26" }
 core_simd = { git = "https://github.com/rust-lang/stdsimd" }
 fxhash = "0.2.1"
+
+#g3 = { git = "https://github.com/wrnrlr/g3", rev = "5af9c38" }
+rend3 = { git = "https://github.com/BVE-Reborn/rend3", package = "rend3", rev = "da12c9b" }
+rend3-routine = { git = "https://github.com/BVE-Reborn/rend3", package = "rend3-routine", rev = "da12c9b" }
+rend3-framework = { git = "https://github.com/BVE-Reborn/rend3", package = "rend3-framework", rev = "da12c9b" }
+
+g3 = { path = "../g3" }
+#rend3 = { path = "../rend3/rend3" }
+#rend3-routine = { path = "../rend3/rend3-routine" }
+#rend3-framework = { path = "../rend3/rend3-framework" }

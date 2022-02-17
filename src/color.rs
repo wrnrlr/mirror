@@ -8,9 +8,9 @@ impl Color {
   pub const RED: Self = Self(0xFF0000FF);
   pub const GREEN: Self = Self(0x00FF00FF);
   pub const BLUE: Self = Self(0x0000FFFF);
-  pub const YELLOW: Self = Self(0xFFFF00FF);
-  pub const CYAN: Self = Self(0x00FFFFFF);
-  pub const MAGENTA: Self = Self(0x0000FFFF);
+  pub const YELLOW: Self = Self(0xFF00FFFF);
+  pub const CYAN: Self = Self(0xFFFF00FF);
+  pub const MAGENTA: Self = Self(0x00FFFFFF);
 
   pub fn red(&self)->f32 { ((self.0 >> 24) & 0xff) as f32 / 255.0 }
   pub fn green(&self)->f32 { ((self.0 >> 16) & 0xff) as f32 / 255.0 }

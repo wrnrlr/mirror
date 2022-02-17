@@ -16,7 +16,7 @@ rend3 = { git = "https://github.com/BVE-Reborn/rend3", package = "rend3", rev = 
 rend3-routine = { git = "https://github.com/BVE-Reborn/rend3", package = "rend3-routine", rev = "da12c9b" }
 rend3-framework = { git = "https://github.com/BVE-Reborn/rend3", package = "rend3-framework", rev = "da12c9b" }
 
-g3 = { path = "../g3" }
+g3 = { path = "../g3", features = ["glam"] }
 #rend3 = { path = "../rend3/rend3" }
 #rend3-routine = { path = "../rend3/rend3-routine" }
 #rend3-framework = { path = "../rend3/rend3-framework" }

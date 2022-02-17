@@ -12,7 +12,7 @@ pub use color::Color;
 use g3::*;
 use std::sync::Arc;
 use glam::{Mat4, Vec3, Vec4};
-use rend3::types::{CameraProjection, DirectionalLightHandle, Handedness, ObjectHandle, ObjectMeshKind};
+use rend3::types::{Camera, CameraProjection, DirectionalLightHandle, Handedness, ObjectHandle, ObjectMeshKind};
 pub use rend3_framework::{App,start};
 use rend3_routine::pbr::{AlbedoComponent, PbrMaterial};
 
@@ -35,8 +35,10 @@ pub struct Mirror {
 }
 
 impl Mirror {
-  pub fn vertex(&mut self, p:Point, c:Color) {
+  pub fn vertex(&mut self, p:Point, c:Color)->hecs::Entity {
+    let p = p.normalized();
     self.points.push((p, c));
+    self.world.spawn((p, c))
   }
 
   pub fn face(&mut self, face:[Point; 3], c:Color) {
@@ -44,7 +46,7 @@ impl Mirror {
   }
 }
 
-const POINT_RADIUS:f32 = 0.1;
+const POINT_RADIUS:f32 = 0.07;
 
 impl App for Mirror {
   const HANDEDNESS: Handedness = Handedness::Left;
@@ -69,11 +71,10 @@ impl App for Mirror {
         ..PbrMaterial::default()
       };
       let material_handle = renderer.add_material(material);
-      let transf = Mat4::from_translation([p.x(), p.y(), p.z()].into());
       let object = rend3::types::Object {
         mesh_kind: ObjectMeshKind::Static(sphere_mesh_handle),
         material: material_handle,
-        transform: transf,
+        transform: p.into(),
       };
       self.objects.push(renderer.add_object(object));
     }
@@ -96,12 +97,12 @@ impl App for Mirror {
       self.objects.push(renderer.add_object(object));
     }
 
-    let view_location = Vec3::new(3.0, 3.0, -5.0);
-    let view = Mat4::from_euler(glam::EulerRot::XYZ, -0.55, 0.5, 0.0);
+    let view_location = Vec3::new(0.0, 0.0, -5.0);
+    let view = Mat4::from_euler(glam::EulerRot::XYZ, -0.0, 0.0, 0.0);
     let view = view * Mat4::from_translation(-view_location);
 
     // Set camera's location
-    renderer.set_camera_data(rend3::types::Camera {
+    renderer.set_camera_data(Camera {
       projection: CameraProjection::Perspective { vfov: 60.0, near: 0.1 },
       view,
     });
@@ -113,7 +114,7 @@ impl App for Mirror {
       color: Color::WHITE.into(),
       intensity: 10.0,
       // Direction will be normalized
-      direction: Vec3::new(-1.0, -4.0, 2.0),
+      direction: Vec3::new(-0.0, -0.0, 2.0),
       distance: 400.0,
     }));
   }
@@ -175,14 +176,4 @@ impl App for Mirror {
       _ => {}
     }
   }
-}
-
-
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {
-        let result = 2 + 2;
-        assert_eq!(result, 4);
-    }
 }

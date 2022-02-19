@@ -5,18 +5,18 @@ edition = "2021"
 
 [dependencies]
 glam = "0.20.0"
-hecs = "0.7.3"
 env_logger = { version = "0.9", default-features = false, features = ["termcolor", "atty"] }
 winit = { version = "0.26" }
 core_simd = { git = "https://github.com/rust-lang/stdsimd" }
 fxhash = "0.2.1"
+bevy_ecs = "0.6.1"
 
-#g3 = { git = "https://github.com/wrnrlr/g3", rev = "5af9c38" }
+#g3 = { git = "https://github.com/wrnrlr/g3", rev = "5af9c38", features = ["glam", "bevy"] }
 rend3 = { git = "https://github.com/BVE-Reborn/rend3", package = "rend3", rev = "da12c9b" }
 rend3-routine = { git = "https://github.com/BVE-Reborn/rend3", package = "rend3-routine", rev = "da12c9b" }
 rend3-framework = { git = "https://github.com/BVE-Reborn/rend3", package = "rend3-framework", rev = "da12c9b" }
 
-g3 = { path = "../g3", features = ["glam"] }
+g3 = { path = "../g3", package = "g3", features = ["glam", "bevy"] }
 #rend3 = { path = "../rend3/rend3" }
 #rend3-routine = { path = "../rend3/rend3-routine" }
 #rend3-framework = { path = "../rend3/rend3-framework" }

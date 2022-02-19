@@ -1,4 +1,6 @@
-#[derive(Clone, Copy, Debug, Hash, PartialEq, PartialOrd)]
+use bevy_ecs::prelude::Component;
+
+#[derive(Clone, Copy, Debug, Hash, PartialEq, PartialOrd, Component)]
 pub struct Color(pub u32);
 
 impl Color {

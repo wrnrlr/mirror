@@ -16,11 +16,8 @@ impl Plugin for PlotPlugin {
   }
 }
 
-/// set up a simple 3D scene
 fn setup(
-  mut commands: Commands,
-  mut meshes: ResMut<Assets<Mesh>>,
-  mut materials: ResMut<Assets<StandardMaterial>>,
+  mut commands: Commands
 ) {
   commands.spawn_bundle(PointLightBundle {
     point_light: PointLight {
@@ -41,29 +38,22 @@ fn g3_points(
   mut cmd:Commands,
   mut meshes: ResMut<Assets<Mesh>>,
   mut materials: ResMut<Assets<StandardMaterial>>,
-  q:Query<Entity, (With<Point>, With<Rgba>)>
+  q:Query<(Entity, &Point, &Rgba, Added<Point>)>
 ) {
-  for e in q.iter() {
-    let (p,c) = e;
-    cmd.entity(e).insert(
-      PbrBundle {
-        mesh: meshes.add(Mesh::from(shape::Icosphere { radius: 0.1, subdivisions: 8 })),
-        material: materials.add(Color::rgb(c.red(), c.green(), c.blue()).into()),
-        transform: Transform::from_xyz(p.x(), p.y(), p.z()),
-        ..Default::default()
-      }
-    );
-    // cmd.spawn_bundle();
+  for (e,p,c,_) in q.iter() {
+    cmd.entity(e).insert_bundle(PbrBundle {
+      mesh: meshes.add(Mesh::from(shape::Icosphere { radius: 0.1, subdivisions: 8 })),
+      material: materials.add(Color::rgb(c.red(), c.green(), c.blue()).into()),
+      transform: Transform::from_xyz(p.x(), p.y(), p.z()),
+      ..Default::default()
+    });
   }
 }
 
 fn points_changed(
-  mut cmd:Commands,
-  mut meshes: ResMut<Assets<Mesh>>,
-  mut materials: ResMut<Assets<StandardMaterial>>,
-  q:Query<(&Point, &Rgba), Changed<Point>>
+  q:Query<(Point, &Rgba, PbrBundle), Changed<Point>>
 ) {
   for e in q.iter() {
-    println!("changed p {}", e);
+    println!("changed p {:?}", e);
   }
 }

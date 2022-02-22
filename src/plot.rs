@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use g3::{Point,point};
+use g3::*;
 use crate::Rgba;
 
 pub struct PlotPlugin;
@@ -16,21 +16,13 @@ impl Plugin for PlotPlugin {
   }
 }
 
-fn setup(
-  mut commands: Commands
-) {
-  commands.spawn_bundle(PointLightBundle {
-    point_light: PointLight {
-      intensity: 1500.0,
-      shadows_enabled: false,
-      ..Default::default()
-    },
+fn setup(mut cmd: Commands) {
+  cmd.spawn_bundle(PointLightBundle {
+    point_light: PointLight {intensity: 1500.0, shadows_enabled: false, ..Default::default()},
     transform: Transform::from_xyz(4.0, 8.0, 4.0), ..Default::default()
   });
-  // camera
-  commands.spawn_bundle(PerspectiveCameraBundle {
-    transform: Transform::from_xyz(-2.0, 2.5, 5.0).looking_at(Vec3::ZERO, Vec3::Y),
-    ..Default::default()
+  cmd.spawn_bundle(PerspectiveCameraBundle {
+    transform: Transform::from_xyz(-2.0, 2.5, 5.0).looking_at(Vec3::ZERO, Vec3::Y), ..Default::default()
   });
 }
 

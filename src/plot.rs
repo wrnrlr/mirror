@@ -51,9 +51,9 @@ fn g3_points(
 }
 
 fn points_changed(
-  q:Query<(Point, &Rgba, PbrBundle), Changed<Point>>
+  mut q:Query<(&Point, &mut Transform, Changed<Point>)>
 ) {
-  for e in q.iter() {
-    println!("changed p {:?}", e);
+  for (p,mut t,_) in q.iter_mut() {
+    *t.translation = *Vec3::from([p.x(), p.y(), p.z()]);
   }
 }

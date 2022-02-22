@@ -6,9 +6,7 @@
 
 mod color;
 mod mirror;
-mod shape;
 mod plot;
 
 pub use color::Rgba;
 pub use plot::PlotPlugin;
-// pub use mirror::{Mirror,start};

@@ -7,6 +7,8 @@
 mod color;
 mod mirror;
 mod plot;
+mod orbit;
 
 pub use color::Rgba;
 pub use plot::PlotPlugin;
+pub use orbit::*;

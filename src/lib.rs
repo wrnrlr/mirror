@@ -8,7 +8,9 @@ mod color;
 mod mirror;
 mod plot;
 mod orbit;
+mod plane;
 
 pub use color::Rgba;
 pub use plot::PlotPlugin;
 pub use orbit::*;
+pub(crate) use plane::DoubleSidedPlane;

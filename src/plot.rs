@@ -60,7 +60,7 @@ fn lines_added(
 ) {
   for (e,l,c,_) in q.iter() {
     let b:Branch = l.into();
-    // let r:Rotor = b.into();
+    // let r:Rotor = Rotor{ p1: b.p1 };
     // let ea:EulerAngles = r.into();
 
     cmd.entity(e).insert_bundle(PbrBundle {
@@ -81,9 +81,12 @@ fn plane_added(
 ) {
   for (e,p,c,_) in q.iter() {
     print!("add plane ");
+    let mut material:StandardMaterial = Color::rgba(c.red(), c.green(), c.blue(), 0.5).into();
+    material.alpha_mode = AlphaMode::Blend;
+    material.double_sided = true;
     cmd.entity(e).insert_bundle(PbrBundle {
       mesh: meshes.add(Mesh::from(DoubleSidedPlane{ size: 1.0 })),
-      material: materials.add(Color::rgb(c.red(), c.green(), c.blue()).into()),
+      material: materials.add(material),
       // transform: Transform::from_rotation(Quat::from_array([p.x(), p.y(), b.z(), 0.0])),
       // transform: Transform::from_rotation(Quat::from_euler(glam::EulerRot::XYZ, ea.roll, ea.pitch, ea.yaw)),
       ..Default::default()

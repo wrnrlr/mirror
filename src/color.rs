@@ -1,9 +1,7 @@
-use bevy::prelude::Component;
+#[derive(Clone, Copy, Debug, Hash, PartialEq, PartialOrd)]
+pub struct Color(pub u32);
 
-#[derive(Clone, Copy, Debug, Hash, PartialEq, PartialOrd, Component)]
-pub struct Rgba(pub u32);
-
-impl Rgba {
+impl Color {
   pub const BLACK: Self = Self(0x000000FF);
   pub const WHITE: Self = Self(0xFFFFFFFF);
   pub const GREY: Self = Self(0xFF888888);
@@ -20,24 +18,24 @@ impl Rgba {
   pub fn alpha(&self)->f32 { ((self.0) & 0xff) as f32 / 255.0 }
 }
 
-impl Into<glam::Vec4> for Rgba {
-  fn into(self) -> glam::Vec4 { glam::Vec4::new(self.red(), self.blue(), self.green(), self.alpha()) }
-}
-
-impl Into<glam::Vec4> for &Rgba {
-  fn into(self) -> glam::Vec4 { glam::Vec4::new(self.red(), self.blue(), self.green(), self.alpha()) }
-}
-
-impl Into<glam::Vec3> for Rgba {
-  fn into(self) -> glam::Vec3 { glam::Vec3::new(self.red(), self.blue(), self.green()) }
-}
+// impl Into<glam::Vec4> for Rgba {
+//   fn into(self) -> glam::Vec4 { glam::Vec4::new(self.red(), self.blue(), self.green(), self.alpha()) }
+// }
+//
+// impl Into<glam::Vec4> for &Rgba {
+//   fn into(self) -> glam::Vec4 { glam::Vec4::new(self.red(), self.blue(), self.green(), self.alpha()) }
+// }
+//
+// impl Into<glam::Vec3> for Rgba {
+//   fn into(self) -> glam::Vec3 { glam::Vec3::new(self.red(), self.blue(), self.green()) }
+// }
 
 #[cfg(test)]
 mod tests {
   use super::*;
 
   #[test] fn color() {
-    assert_eq!([Rgba::RED.red(), Rgba::RED.green(), Rgba::RED.blue(), Rgba::RED.alpha()], [1.0, 0.0, 0.0, 1.0]);
-    assert_eq!([Rgba::CYAN.red(), Rgba::CYAN.green(), Rgba::CYAN.blue(), Rgba::CYAN.alpha()], [0.0, 1.0, 1.0, 1.0]);
+    assert_eq!([Color::RED.red(), Color::RED.green(), Color::RED.blue(), Color::RED.alpha()], [1.0, 0.0, 0.0, 1.0]);
+    assert_eq!([Color::CYAN.red(), Color::CYAN.green(), Color::CYAN.blue(), Color::CYAN.alpha()], [0.0, 1.0, 1.0, 1.0]);
   }
 }

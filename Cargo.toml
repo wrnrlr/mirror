@@ -3,10 +3,30 @@ name = "mirror"
 version = "0.1.0"
 edition = "2021"
 
+[lib]
+crate-type = ["cdylib", "rlib"]
+
 [dependencies]
 core_simd = { git = "https://github.com/rust-lang/stdsimd" }
-glam = "0.20.0"
-fxhash = "0.2.1"
-bevy = "0.6.1"
-g3 = { git = "https://github.com/wrnrlr/g3", rev = "bc7884e", features = ["bevy"] }
-#g3 = { path = "../g3", package = "g3", features = ["bevy"] }
+g3 = { git = "https://github.com/wrnrlr/g3", rev = "bc7884e" }
+#g3 = { path = "../g3", package = "g3" }
+glam = "0.20.5"
+winit = "0.26.1"
+env_logger = "0.8"
+log = "0.4"
+wgpu = "0.12.0"
+futures = "0.3"
+bytemuck = { version = "1.5", features = [ "derive" ] }
+anyhow = "1.0"
+pollster = "0.2"
+notify = "4.0.17"
+naga = { version = "0.8.5", features = ["wgsl-in"] }
+cfg-if = "1.0.0"
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+console_error_panic_hook = "0.1.6"
+console_log = "0.2.0"
+wgpu = { version = "0.12", features = ["webgl"]}
+wasm-bindgen = "0.2"
+wasm-bindgen-futures = "0.4"
+web-sys = { version = "0.3", features = ["Document", "Window", "Element"]}

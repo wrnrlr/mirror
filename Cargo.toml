@@ -8,7 +8,7 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 core_simd = { git = "https://github.com/rust-lang/stdsimd" }
-g3 = { git = "https://github.com/wrnrlr/g3", rev = "bc7884e" }
+g3 = { git = "https://github.com/wrnrlr/g3", rev = "ebefd1" }
 #g3 = { path = "../g3", package = "g3" }
 glam = "0.20.5"
 winit = "0.26.1"

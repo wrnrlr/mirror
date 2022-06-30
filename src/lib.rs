@@ -10,7 +10,7 @@ use wasm_bindgen::prelude::*;
 mod pass;
 mod context;
 mod color;
-mod phong;
+mod mesh;
 
 pub use color::Color;
 pub use context::{Window, Cx};

@@ -50,7 +50,14 @@ pub async fn run() {
     match e {
       Event::RedrawRequested(window_id) if (window_id==window.window.id()) => { cx.render() }
       Event::MainEventsCleared => { window.window.request_redraw() }
-      Event::WindowEvent{event:WindowEvent::CloseRequested,window_id} if (window_id==window.window.id())=> { *control_flow = ControlFlow::Exit }
+      Event::WindowEvent{ref event,window_id} if (window_id==window.window.id()) => {
+        match event {
+          WindowEvent::CloseRequested => {*control_flow = ControlFlow::Exit},
+          WindowEvent::Resized(physical_size) => { cx.resize(physical_size.width, physical_size.height); }
+          WindowEvent::ScaleFactorChanged{new_inner_size, ..} => { cx.resize(new_inner_size.width, new_inner_size.height); }
+          _ => {}
+        }
+      }
       _ => {}
     }
   });

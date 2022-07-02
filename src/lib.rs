@@ -48,9 +48,9 @@ pub async fn run() {
   let App{window,mut cx} = App::new().await;
   window.event_loop.run(move |e, _, control_flow| {
     match e {
-      Event::RedrawRequested(_) => { cx.render() }
+      Event::RedrawRequested(window_id) if (window_id==window.window.id()) => { cx.render() }
       Event::MainEventsCleared => { window.window.request_redraw() }
-      Event::WindowEvent{event:WindowEvent::CloseRequested,..} => { *control_flow = ControlFlow::Exit }
+      Event::WindowEvent{event:WindowEvent::CloseRequested,window_id} if (window_id==window.window.id())=> { *control_flow = ControlFlow::Exit }
       _ => {}
     }
   });

@@ -145,7 +145,7 @@ impl Cx {
       multiview: None,
     });
 
-    let mesh = &create_plane_mesh(g3::E1);
+    let mesh = &create_plane_mesh(g3::E3);
     println!("{:?}", mesh);
 
     let vertex_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
@@ -205,7 +205,6 @@ impl Cx {
       render_pass.set_pipeline(&self.render_pipeline);
       render_pass.set_vertex_buffer(0, self.vertex_buffer.slice(..));
       render_pass.set_index_buffer(self.index_buffer.slice(..), wgpu::IndexFormat::Uint32);
-      // render_pass.set_bind_group(0, &self.uniforms_bind_group, &[]);
       render_pass.draw_indexed(0..self.num_indices, 0, 0..1);
     }
     self.queue.submit(std::iter::once(encoder.finish()));

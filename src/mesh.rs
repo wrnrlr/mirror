@@ -32,7 +32,6 @@ pub fn create_plane_mesh(p:Plane)-> Mesh {
   println!("{:?}", c);
   println!("{:?}", d);
   let vertices:Vec<[f32;3]> = vec!(a.into(), b.into(), c.into(), d.into());
-  // let vertices:Vec<Vec3> = vec!(a, b, c, d).into();
   let indices = vec!(0u32, 2, 1, 0, 3, 2, 2, 3, 0, 1, 2, 0);
   // normals??
   Mesh{vertices,indices}

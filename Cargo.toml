@@ -30,3 +30,11 @@ wgpu = { version = "0.12", features = ["webgl"]}
 wasm-bindgen = "0.2"
 wasm-bindgen-futures = "0.4"
 web-sys = { version = "0.3", features = ["Document", "Window", "Element"]}
+
+[[bin]]
+name = "mirror"
+path = "src/main.rs"
+
+[profile.dev]
+opt-level = 0
+debug = true

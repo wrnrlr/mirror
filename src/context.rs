@@ -99,7 +99,7 @@ impl Cx {
         // using an erroneous format, it is changed before used
         format: wgpu::TextureFormat::Depth24Plus,
         width: size.width, height: size.height,
-        present_mode: wgpu::PresentMode::Mailbox,
+        present_mode: wgpu::PresentMode::Fifo, // Use best available options..
       },
     };
 
@@ -113,13 +113,13 @@ impl Cx {
         label: None, features: wgpu::Features::empty(),
         limits: if cfg!(target_arch = "wasm32") {wgpu::Limits::downlevel_webgl2_defaults()}else{wgpu::Limits::default()}}, None).await.unwrap();
 
-    let format = surface.raw.get_preferred_format(&adapter).unwrap();
+    let format = surface.raw.get_supported_formats(&adapter)[0];
     surface.config.format = format;
     surface.raw.configure(&device, &surface.config);
 
     println!("{}, {}", surface.config.width, surface.config.height);
 
-    let shader_module = device.create_shader_module(&wgpu::ShaderModuleDescriptor {
+    let shader_module = device.create_shader_module(wgpu::ShaderModuleDescriptor {
       label: Some("Phong Shader"),
       source: wgpu::ShaderSource::Wgsl(include_str!("pass/phong.wgsl").into()),
     });
@@ -158,13 +158,13 @@ impl Cx {
       bind_group_layouts: &[&camera_bind_group_layout],
       push_constant_ranges: &[]});
 
-    let target_info_format = &[wgpu::ColorTargetState {
+    let target_info_format = &[Some(wgpu::ColorTargetState {
       format: surface.config.format,
       blend: Some(wgpu::BlendState {
         color: wgpu::BlendComponent::REPLACE,
         alpha: wgpu::BlendComponent::REPLACE,
       }),
-      write_mask: wgpu::ColorWrites::ALL}];
+      write_mask: wgpu::ColorWrites::ALL})];
     let primitive = wgpu::PrimitiveState{cull_mode:Some(wgpu::Face::Back),..Default::default()};
     let multisample = wgpu::MultisampleState{count:1, ..Default::default()};
     let depth_stencil = None;
@@ -186,7 +186,6 @@ impl Cx {
     });
 
     let mesh = &create_plane_mesh(g3::E3);
-    println!("{:?}", mesh);
 
     let vertex_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
       label: Some("Vertex Buffer"),
@@ -197,7 +196,6 @@ impl Cx {
       contents: bytemuck::cast_slice(&mesh.indices),
       usage: wgpu::BufferUsages::INDEX});
     let num_indices = mesh.indices.len() as u32;
-    println!("indices: {:?}",num_indices);
 
     Self {
       // window,
@@ -255,7 +253,6 @@ impl Cx {
     let mut encoder = self.device.create_command_encoder(&wgpu::CommandEncoderDescriptor{label: Some("Render Encoder")});
     {
       let aspect = surface.aspect_ratio();
-      println!("{}", aspect);
       let m_proj = self.camera.projection_matrix(aspect);
       let m_view = self.camera.view_matrix();
       // let m_view_inv = nodes[camera.node].inverse_matrix();
@@ -268,7 +265,7 @@ impl Cx {
     {
       let mut render_pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
         label: Some("Render Pass"),
-        color_attachments: &[wgpu::RenderPassColorAttachment{view: &view, resolve_target: None, ops: wgpu::Operations{load: wgpu::LoadOp::Clear(wgpu::Color{r:0.1,g:0.2,b:0.3,a:1.0}),store: true}}],
+        color_attachments: &[Some(wgpu::RenderPassColorAttachment{view: &view, resolve_target: None, ops: wgpu::Operations{load: wgpu::LoadOp::Clear(wgpu::Color{r:0.1,g:0.2,b:0.3,a:1.0}),store: true}})],
         depth_stencil_attachment: None});
       render_pass.set_pipeline(&self.render_pipeline);
       render_pass.set_bind_group(0, &self.camera_bind_group, &[]);
@@ -308,7 +305,7 @@ impl Default for Camera {
       target: [0.0, 0.0, 0.0].into(),
       up: [0.0, 1.0, 0.0].into(),
       // Vertical field of view, in degrees...
-      fov_y: 160.0,
+      fov_y: 100.0,
       depth: -0.1..100.0, // 0.0..1.0
       // node: super::NodeRef::default(),
       background: Color::BLACK,

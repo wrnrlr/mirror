@@ -346,6 +346,19 @@ impl CameraUniform {
   }
 }
 
+fn align(a1:g3::Point,a2:g3::Point,a3:g3::Point,b1:g3::Point,b2:g3::Point,b3:g3::Point)->g3::Motor {
+  let m = (b1.normalized()/a1.normalized()).sqrt();
+  let p = a1 & (m(a2)); let q = b1 & b2;
+  let m = (q.normalized()/p.normalized()).sqrt() * m;
+  let p = p & (m(a3)); let q = q & b3;
+  (q.normalized()/p.normalized()).sqrt() * m
+}
+
+pub fn look_at(eye:g3::Point, target:g3::Point, pole:g3::Point)->g3::Motor {
+  align(!g3::E0, !-g3::E3, !-g3::E2, eye, target, pole)
+  // align(eye, !g3::E0, target, !-g3::E3, pole, !-g3::E2)
+}
+
 #[cfg(test)]
 mod tests {
   use super::*;

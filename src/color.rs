@@ -18,6 +18,10 @@ impl Color {
   pub fn alpha(&self)->f32 { ((self.0) & 0xff) as f32 / 255.0 }
 }
 
+impl Into<[f32;4]> for Color {
+  fn into(self) -> [f32;4] { [self.red(), self.green(), self.blue(), self.alpha()] }
+}
+
 // impl Into<glam::Vec4> for Rgba {
 //   fn into(self) -> glam::Vec4 { glam::Vec4::new(self.red(), self.blue(), self.green(), self.alpha()) }
 // }

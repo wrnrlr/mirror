@@ -1,3 +1,4 @@
+use std::f32::consts::PI;
 use wgpu::util::DeviceExt;
 use crate::Color;
 use crate::mesh::{create_plane_mesh, Vertex};
@@ -77,13 +78,19 @@ pub struct Cx {
   render_pipeline: wgpu::RenderPipeline,
 
   camera: Camera,
-  camera_uniform: CameraUniform,
-  camera_buffer: wgpu::Buffer,
-  camera_bind_group: wgpu::BindGroup,
+  global_uniform: Globals,
+
+  global_buffer: wgpu::Buffer,
+  global_bind_group: wgpu::BindGroup,
+
+  local_buffer: wgpu::Buffer,
+  local_bind_group_layout: wgpu::BindGroupLayout,
+  local_bind_group: wgpu::BindGroup,
 
   vertex_buffer: wgpu::Buffer,
   index_buffer: wgpu::Buffer,
   num_indices: u32,
+
   // images: Vec<Image>,
   // meshes: Vec<Mesh>,
 }
@@ -126,36 +133,51 @@ impl Cx {
 
     let aspect_ratio = size.width as f32 / size.height as f32;
     let camera = Camera::default();
-    let mut camera_uniform = CameraUniform::new();
-    camera_uniform.update_view_proj(&camera, aspect_ratio);
-    let camera_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
-      label: Some("Camera Buffer"),
-      contents: bytemuck::cast_slice(&[camera_uniform]),
+    let mut global_uniform = Globals::new();
+    global_uniform.update_view_proj(&camera, aspect_ratio);
+    let global_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+      label: Some("Global Buffer"),
+      contents: bytemuck::cast_slice(&[global_uniform]),
       usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST});
-    let camera_bind_group_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
-      entries: &[
-        wgpu::BindGroupLayoutEntry {
-          binding: 0,
+    let global_bind_group_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+      label: Some("global_bind_group_layout"),
+      entries: &[wgpu::BindGroupLayoutEntry {
+          binding: 0, count: None,
           visibility: wgpu::ShaderStages::VERTEX,
           ty: wgpu::BindingType::Buffer {
             ty: wgpu::BufferBindingType::Uniform,
             has_dynamic_offset: false,
-            min_binding_size: None,
-          },
-          count: None,
-        }
-      ],
-      label: Some("camera_bind_group_layout"),
+            min_binding_size: None}}]});
+    let global_bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
+      label: Some("local_bind_group"), layout: &global_bind_group_layout,
+      entries: &[wgpu::BindGroupEntry {binding: 0, resource: global_buffer.as_entire_binding()}]});
+
+    let local_buffer = device.create_buffer(&wgpu::BufferDescriptor {
+      label: Some("Local Buffer"),
+      size: std::mem::size_of::<Locals>() as wgpu::BufferAddress,
+      usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
+      mapped_at_creation: false
     });
-    let camera_bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
-      layout: &camera_bind_group_layout,
-      entries: &[wgpu::BindGroupEntry {binding: 0, resource: camera_buffer.as_entire_binding()}],
-      label: Some("camera_bind_group"),
+    let local_bind_group_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+      label: Some("solid locals"),
+      entries: &[wgpu::BindGroupLayoutEntry {
+        binding: 0,
+        visibility: wgpu::ShaderStages::VERTEX | wgpu::ShaderStages::FRAGMENT,
+        ty: wgpu::BindingType::Buffer {
+          ty: wgpu::BufferBindingType::Uniform,
+          has_dynamic_offset: true,
+          min_binding_size: wgpu::BufferSize::new(std::mem::size_of::<Locals>() as wgpu::BufferAddress),
+        },
+        count: None,
+      }],
     });
+    let local_bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
+      label: Some("solid locals"), layout: &local_bind_group_layout,
+      entries: &[wgpu::BindGroupEntry {binding: 0, resource: local_buffer.as_entire_binding()}]});
 
     let render_pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
       label: Some("Render Pipeline Layout"),
-      bind_group_layouts: &[&camera_bind_group_layout],
+      bind_group_layouts: &[&global_bind_group_layout, &local_bind_group_layout],
       push_constant_ranges: &[]});
 
     let target_info_format = &[Some(wgpu::ColorTargetState {
@@ -207,13 +229,17 @@ impl Cx {
       render_pipeline,
 
       camera,
-      camera_uniform,
-      camera_buffer,
-      camera_bind_group,
+      global_uniform,
+      global_buffer,
+      global_bind_group,
+
+      local_buffer,
+      local_bind_group_layout,
+      local_bind_group,
 
       vertex_buffer,
       index_buffer,
-      num_indices
+      num_indices,
     }
   }
 
@@ -259,19 +285,25 @@ impl Cx {
       // let m_final = m_proj * glam::Mat4::from(m_view_inv);
       // let globals = Globals { view_proj: m_final.to_cols_array_2d() };
       let m = m_proj * m_view;
-      let globals = CameraUniform{view_proj: m.to_cols_array_2d()};
-      self.queue.write_buffer(&self.camera_buffer, 0, bytemuck::bytes_of(&globals));
+      let globals = Globals{view_proj: m.to_cols_array_2d()};
+      self.queue.write_buffer(&self.global_buffer, 0, bytemuck::bytes_of(&globals));
     }
     {
-      let mut render_pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
+      let mut pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
         label: Some("Render Pass"),
         color_attachments: &[Some(wgpu::RenderPassColorAttachment{view: &view, resolve_target: None, ops: wgpu::Operations{load: wgpu::LoadOp::Clear(wgpu::Color{r:0.1,g:0.2,b:0.3,a:1.0}),store: true}})],
         depth_stencil_attachment: None});
-      render_pass.set_pipeline(&self.render_pipeline);
-      render_pass.set_bind_group(0, &self.camera_bind_group, &[]);
-      render_pass.set_vertex_buffer(0, self.vertex_buffer.slice(..));
-      render_pass.set_index_buffer(self.index_buffer.slice(..), wgpu::IndexFormat::Uint32);
-      render_pass.draw_indexed(0..self.num_indices, 0, 0..1);
+      pass.set_pipeline(&self.render_pipeline);
+      pass.set_bind_group(0, &self.global_bind_group, &[]);
+
+      let locals = Locals{color: Color::GREEN.into()};
+      self.queue.write_buffer(&self.local_buffer, 0, bytemuck::bytes_of(&locals));
+      let offset = 0;
+      pass.set_bind_group(1, &self.local_bind_group, &[offset]);
+
+      pass.set_vertex_buffer(0, self.vertex_buffer.slice(..));
+      pass.set_index_buffer(self.index_buffer.slice(..), wgpu::IndexFormat::Uint32);
+      pass.draw_indexed(0..self.num_indices, 0, 0..1);
     }
     self.queue.submit(Some(encoder.finish()));
     frame.present();
@@ -313,6 +345,11 @@ impl Default for Camera {
   }
 }
 
+#[repr(C)] #[derive(Debug, Copy, Clone, bytemuck::Pod, bytemuck::Zeroable)]
+struct Locals {
+  color: [f32;4]
+}
+
 impl Camera {
   pub fn view_matrix(&self) -> glam::Mat4 {
     glam::Mat4::look_at_rh(self.eye.into(), self.target.into(), self.up.into())
@@ -328,16 +365,25 @@ impl Camera {
     //       glam::Mat4::perspective_rh(fov, aspect, self.depth.start, self.depth.end)
     //     };
     // matrix
+
+    // let near = self.depth.start; let far = self.depth.end;
+    // let f = (1.0/(fov / 2.0).tan()) * (PI/180); WRONG
+    //
+    // // https://www.scratchapixel.com/lessons/3d-basic-rendering/perspective-and-orthographic-projection-matrix/building-basic-perspective-projection-matrix
+    // let m = [[f, 0.0, 0.0, 0.0],
+    //          [0.0, f, 0.0, 0.0],
+    //          [f, 0.0, (far+near)/(near-far), -0.0],
+    //          [f, 0.0, (2.0*far*near)/(near-far), 0.0]];
     glam::Mat4::perspective_rh(fov, aspect, -0.1, 1.0)
   }
 }
 
 #[repr(C)] #[derive(Debug, Copy, Clone, bytemuck::Pod, bytemuck::Zeroable)]
-pub struct CameraUniform {
+pub struct Globals {
   view_proj:[[f32;4];4]
 }
 
-impl CameraUniform {
+impl Globals {
   fn new() -> Self {
     Self{view_proj: glam::Mat4::IDENTITY.to_cols_array_2d()}
   }
@@ -356,7 +402,6 @@ fn align(a1:g3::Point,a2:g3::Point,a3:g3::Point,b1:g3::Point,b2:g3::Point,b3:g3:
 
 pub fn look_at(eye:g3::Point, target:g3::Point, pole:g3::Point)->g3::Motor {
   align(!g3::E0, !-g3::E3, !-g3::E2, eye, target, pole)
-  // align(eye, !g3::E0, target, !-g3::E3, pole, !-g3::E2)
 }
 
 #[cfg(test)]
